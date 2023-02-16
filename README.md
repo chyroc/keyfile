@@ -4,7 +4,7 @@ Keychain-based file encryption
 ## Install
 
 ```shell
-go install github.com/chyroc/keyfile@latest
+CGO_ENABLED=1 go install github.com/chyroc/keyfile@latest
 ```
 
 ## Usage
