@@ -15,6 +15,9 @@ func getSecret(account string) ([]byte, error) {
 	if err != nil && !errors.Is(err, ErrItemNotFound) {
 		return nil, err
 	} else if len(data) != 0 {
+		if len(data) > 32 {
+			return nil, fmt.Errorf("large secret size: %d", len(data))
+		}
 		return data, nil
 	}
 
@@ -32,6 +35,8 @@ func getSecret(account string) ([]byte, error) {
 		return nil, fmt.Errorf("get '%s' secret error: %w", account, err)
 	} else if len(data) == 0 {
 		return nil, fmt.Errorf("get '%s' secret error: save failed", account)
+	} else if len(data) > 32 {
+		return nil, fmt.Errorf("large secret size: %d", len(data))
 	}
 
 	return data, nil

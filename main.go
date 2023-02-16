@@ -13,7 +13,7 @@ import (
 func main() {
 	app := &cli.App{
 		Name:        "keyfile",
-		Usage:       "keyfile filepath [--read] [--account]",
+		Usage:       "keyfile [--read] [--account] filepath",
 		Description: "Keychain-based file encryption",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
@@ -39,15 +39,20 @@ func main() {
 			var bs []byte
 			var err error
 			if read {
-				bs, err = internal.DecodeFile(path, account)
+				bs, err = internal.DecryptFile(path, account)
 			} else {
-				bs, err = internal.EncodeFile(path, account)
+				bs, err = internal.EncryptFile(path, account)
 			}
 
 			if err != nil {
 				return err
 			}
 			fmt.Println(string(bs))
+			if read {
+				fmt.Fprintf(os.Stderr, "decrypt file '%s' success\n", path)
+			} else {
+				fmt.Fprintf(os.Stderr, "encrypt file '%s' success\n", path)
+			}
 			return nil
 		},
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"encoding/base64"
 )
 
 func pkcs5Padding(plaintext []byte, blockSize int) []byte {
@@ -30,7 +31,7 @@ func paddingKey(key []byte) []byte {
 	return key
 }
 
-func AesEncrypt(originData, key []byte) ([]byte, error) {
+func AesEncrypt(originData, key []byte, withBase64 bool) ([]byte, error) {
 	key = paddingKey(key)
 
 	block, err := aes.NewCipher(key)
@@ -43,10 +44,22 @@ func AesEncrypt(originData, key []byte) ([]byte, error) {
 	blockMode := cipher.NewCBCEncrypter(block, key[:blockSize])
 	encryptData := make([]byte, len(originData))
 	blockMode.CryptBlocks(encryptData, originData)
+
+	if withBase64 {
+		return []byte(base64.StdEncoding.EncodeToString(encryptData)), nil
+	}
+
 	return encryptData, nil
 }
 
-func AesDecrypt(encryptData, key []byte) ([]byte, error) {
+func AesDecrypt(encryptData, key []byte, withBase64 bool) ([]byte, error) {
+	if withBase64 {
+		var err error
+		encryptData, err = base64.StdEncoding.DecodeString(string(encryptData))
+		if err != nil {
+			return nil, err
+		}
+	}
 	key = paddingKey(key)
 
 	block, err := aes.NewCipher(key)

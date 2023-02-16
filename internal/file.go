@@ -1,11 +1,12 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 )
 
-func DecodeFile(path, account string) ([]byte, error) {
+func DecryptFile(path, account string) ([]byte, error) {
 	secret, err := getSecret(account)
 	if err != nil {
 		return nil, err
@@ -14,8 +15,9 @@ func DecodeFile(path, account string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read file '%s' failed: %w", path, err)
 	}
+	bs = bytes.TrimSpace(bs)
 
-	decryptData, err := AesDecrypt(bs, secret)
+	decryptData, err := AesDecrypt(bs, secret, true)
 	if err != nil {
 		return nil, fmt.Errorf("decrypt file '%s' failed: %w", path, err)
 	}
@@ -23,7 +25,7 @@ func DecodeFile(path, account string) ([]byte, error) {
 	return decryptData, nil
 }
 
-func EncodeFile(path, account string) ([]byte, error) {
+func EncryptFile(path, account string) ([]byte, error) {
 	secret, err := getSecret(account)
 	if err != nil {
 		return nil, err
@@ -32,7 +34,9 @@ func EncodeFile(path, account string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read file '%s' failed: %w", path, err)
 	}
-	encryptData, err := AesEncrypt(bs, secret)
+	bs = bytes.TrimSpace(bs)
+
+	encryptData, err := AesEncrypt(bs, secret, true)
 	if err != nil {
 		return nil, fmt.Errorf("encrypt file '%s' failed: %w", path, err)
 	}
