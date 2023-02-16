@@ -1,8 +1,9 @@
 package internal
 
 import (
+	"errors"
+
 	"github.com/keybase/go-keychain"
-	"github.com/pkg/errors"
 )
 
 var ErrDuplicateItem = keychain.ErrorDuplicateItem
