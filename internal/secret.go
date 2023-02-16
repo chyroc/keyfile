@@ -6,11 +6,6 @@ import (
 )
 
 func getSecret(account string) ([]byte, error) {
-	account, err := inputText("account", account)
-	if err != nil {
-		return nil, err
-	}
-
 	data, err := GetKeyChain(account)
 	if err != nil && !errors.Is(err, ErrItemNotFound) {
 		return nil, err

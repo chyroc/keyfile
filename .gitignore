@@ -16,3 +16,4 @@
 ttt/
 .DS_Store
 .idea/
+secret.env.key
