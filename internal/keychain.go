@@ -6,8 +6,10 @@ import (
 	"github.com/keybase/go-keychain"
 )
 
-var ErrDuplicateItem = keychain.ErrorDuplicateItem
-var ErrItemNotFound = keychain.ErrorItemNotFound
+var (
+	ErrDuplicateItem = keychain.ErrorDuplicateItem
+	ErrItemNotFound  = keychain.ErrorItemNotFound
+)
 
 func AddKeyChain(account string, data []byte) error {
 	item := keychain.NewItem()
@@ -40,4 +42,12 @@ func GetKeyChain(account string) ([]byte, error) {
 		return nil, ErrItemNotFound
 	}
 	return results[0].Data, nil
+}
+
+func DeleteKeyChain(account string) error {
+	item := keychain.NewItem()
+	item.SetSecClass(keychain.SecClassGenericPassword)
+	item.SetService(service)
+	item.SetAccount(account)
+	return keychain.DeleteItem(item)
 }

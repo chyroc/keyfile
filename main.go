@@ -13,13 +13,19 @@ import (
 func main() {
 	app := &cli.App{
 		Name:        "keyfile",
-		Usage:       "keyfile filepath [--read]",
+		Usage:       "keyfile filepath [--read] [--account]",
 		Description: "Keychain-based file encryption",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "read",
 				Usage:   "read a file",
 				Aliases: []string{"r"},
+			},
+			&cli.StringFlag{
+				Name:    "account",
+				Usage:   "account name",
+				Aliases: []string{"a"},
+				EnvVars: []string{"KEYFILE_ACCOUNT"},
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -28,13 +34,14 @@ func main() {
 			}
 			path := c.Args().Get(0)
 			read := c.Bool("read")
+			account := c.String("account")
 
 			var bs []byte
 			var err error
 			if read {
-				bs, err = internal.DecodeFile(path)
+				bs, err = internal.DecodeFile(path, account)
 			} else {
-				bs, err = internal.EncodeFile(path)
+				bs, err = internal.EncodeFile(path, account)
 			}
 
 			if err != nil {
