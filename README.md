@@ -12,20 +12,38 @@ CGO_ENABLED=1 go install github.com/chyroc/keyfile@latest
 ### Encrypt File
 
 ```shell
-keyfile -a `<account_name>` filepath > encrypt_filepath
+keyfile encrypt --account `<account_name>` --file filepath > encrypt_filepath
 ```
 
 ### Decrypt File
 
 ```shell
-keyfile -r -a `<account_name>` encrypt_filepath
+keyfile decrypt --account `<account_name>` --file encrypt_filepath
+```
+
+### Get Keychain Secret
+
+```shell
+keyfile get-secret --account `<account_name>`
+```
+
+### Set Keychain Secret
+
+```shell
+keyfile set-secret --account `<account_name>` --secret `<secret>`
+```
+
+### Del Keychain Secret
+
+```shell
+keyfile del-secret --account `<account_name>`
 ```
 
 ### Help
 
 ```shell
 NAME:
-   keyfile - keyfile [--read] [--account] filepath
+   keyfile - A new cli application
 
 USAGE:
    keyfile [global options] command [command options] [arguments...]
@@ -34,10 +52,13 @@ DESCRIPTION:
    Keychain-based file encryption
 
 COMMANDS:
-   help, h  Shows a list of commands or help for one command
+   decrypt, dec  decrypt content from file
+   encrypt, enc  encrypt content from file
+   get-secret    get secret from keychain
+   set-secret    set secret to keychain
+   del-secret    del secret from keychain
+   help, h       Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --read, -r                 read a file (default: false)
-   --account value, -a value  account name [$KEYFILE_ACCOUNT]
-   --help, -h                 show help
+   --help, -h  show help
 ```
