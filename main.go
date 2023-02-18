@@ -22,17 +22,21 @@ func main() {
 				Flags: []cli.Flag{
 					accountFlag,
 					filepathFlag,
+					quietFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
 					path := c.String("file")
+					quiet := c.Bool("quiet")
 
 					bs, err := internal.DecryptFile(path, account)
 					if err != nil {
 						return err
 					}
 					fmt.Println(string(bs))
-					fmt.Fprintf(os.Stderr, "decrypt file '%s' success\n", path)
+					if !quiet {
+						_, _ = fmt.Fprintf(os.Stderr, "decrypt file '%s' success\n", path)
+					}
 					return nil
 				},
 			},
@@ -43,17 +47,21 @@ func main() {
 				Flags: []cli.Flag{
 					accountFlag,
 					filepathFlag,
+					quietFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
 					path := c.String("file")
+					quiet := c.Bool("quiet")
 
 					bs, err := internal.EncryptFile(path, account)
 					if err != nil {
 						return err
 					}
 					fmt.Println(string(bs))
-					fmt.Fprintf(os.Stderr, "encrypt file '%s' success\n", path)
+					if !quiet {
+						fmt.Fprintf(os.Stderr, "encrypt file '%s' success\n", path)
+					}
 					return nil
 				},
 			},
@@ -62,15 +70,21 @@ func main() {
 				Usage: "get secret from keychain",
 				Flags: []cli.Flag{
 					accountFlag,
+					quietFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
+					quiet := c.Bool("quiet")
 
 					bs, err := internal.GetKeyChain(account)
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(os.Stderr, "get secret of '%s': '%s' success\n", account, string(bs))
+					if !quiet {
+						fmt.Fprintf(os.Stderr, "get secret of '%s': '%s' success\n", account, string(bs))
+					} else {
+						fmt.Println(string(bs))
+					}
 					return nil
 				},
 			},
@@ -80,16 +94,20 @@ func main() {
 				Flags: []cli.Flag{
 					accountFlag,
 					secretFlag,
+					quietFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
 					secret := c.String("secret")
+					quiet := c.Bool("quiet")
 
 					err := internal.SetKeyChain(account, []byte(secret))
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(os.Stderr, "set secret of '%s': '%s' success\n", account, secret)
+					if !quiet {
+						fmt.Fprintf(os.Stderr, "set secret of '%s': '%s' success\n", account, secret)
+					}
 					return nil
 				},
 			},
@@ -98,15 +116,19 @@ func main() {
 				Usage: "del secret from keychain",
 				Flags: []cli.Flag{
 					accountFlag,
+					quietFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
+					quiet := c.Bool("quiet")
 
 					err := internal.DeleteKeyChain(account)
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(os.Stderr, "delete secret of '%s' success\n", account)
+					if !quiet {
+						fmt.Fprintf(os.Stderr, "delete secret of '%s' success\n", account)
+					}
 					return nil
 				},
 			},
@@ -141,4 +163,12 @@ var secretFlag = &cli.StringFlag{
 	Aliases:  []string{"s"},
 	EnvVars:  []string{"KEYFILE_SECRET"},
 	Required: true,
+}
+
+var quietFlag = &cli.BoolFlag{
+	Name:     "quiet",
+	Usage:    "quiet mode",
+	Aliases:  []string{"q"},
+	EnvVars:  []string{"KEYFILE_QUIET"},
+	Required: false,
 }
