@@ -17,3 +17,4 @@ ttt/
 .DS_Store
 .idea/
 secret.env.key
+README.md.x

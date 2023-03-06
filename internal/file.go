@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"time"
 )
 
 func DecryptFile(path, account string) ([]byte, error) {
@@ -42,4 +43,50 @@ func EncryptFile(path, account string) ([]byte, error) {
 	}
 
 	return encryptData, nil
+}
+
+func WaitFileChanged(filePath string) (chan bool, error) {
+	initialStat, err := os.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make(chan bool, 1)
+	var finalErr error
+
+	go func() {
+		for {
+			if finalErr != nil {
+				return
+			}
+			stat, err := os.Stat(filePath)
+			if err != nil {
+				finalErr = err
+				return
+			}
+			if stat.Size() != initialStat.Size() || stat.ModTime() != initialStat.ModTime() {
+				res <- true
+				return
+			}
+			time.Sleep(time.Second / 2)
+		}
+	}()
+
+	if finalErr != nil {
+		res <- false
+	}
+
+	return res, finalErr
+}
+
+func WriteTempFile(bs []byte) (string, error) {
+	tmpFile, err := os.CreateTemp("", "keyfile-*")
+	if err != nil {
+		return "", err
+	}
+	if _, err = tmpFile.Write(bs); err != nil {
+		return "", err
+	}
+	_ = tmpFile.Close()
+	return tmpFile.Name(), nil
 }

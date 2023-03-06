@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"log"
 	"os"
-
-	"github.com/urfave/cli/v2"
 
 	"github.com/chyroc/keyfile/internal"
 )
@@ -23,15 +23,54 @@ func main() {
 					accountFlag,
 					filepathFlag,
 					quietFlag,
+					editorFlag,
 				},
 				Action: func(c *cli.Context) error {
 					account := c.String("account")
 					path := c.String("file")
 					quiet := c.Bool("quiet")
+					editor := c.String("editor")
+					if editor != "" {
+						quiet = true
+					}
 
 					bs, err := internal.DecryptFile(path, account)
 					if err != nil {
 						return err
+					}
+					if editor != "" {
+						tmpFile, err := internal.WriteTempFile(bs)
+						if err != nil {
+							return err
+						}
+						defer func() { _ = os.Remove(tmpFile) }()
+
+						go func() {
+							if err := internal.ExecCommand(editor, tmpFile); err != nil {
+								fmt.Printf("exec editor '%s' failed: %s", editor, err)
+								os.Exit(1)
+							}
+						}()
+
+						changed, err := internal.WaitFileChanged(tmpFile)
+						if err != nil {
+							return err
+						}
+						if <-changed {
+							encryptData, err := internal.EncryptFile(tmpFile, account)
+							if err != nil {
+								return err
+							}
+							if bytes.Equal(bs, encryptData) {
+								fmt.Printf("file '%s' not changed, skip write\n", path)
+								return nil
+							}
+
+							fmt.Printf("file '%s' changed, write to file\n", path)
+
+							return os.WriteFile(path, encryptData, 0o600)
+						}
+						return nil
 					}
 					fmt.Println(string(bs))
 					if !quiet {
@@ -170,5 +209,13 @@ var quietFlag = &cli.BoolFlag{
 	Usage:    "quiet mode",
 	Aliases:  []string{"q"},
 	EnvVars:  []string{"KEYFILE_QUIET"},
+	Required: false,
+}
+
+var editorFlag = &cli.StringFlag{
+	Name:     "editor",
+	Usage:    "edit file with editor",
+	Aliases:  []string{"e"},
+	EnvVars:  []string{"KEYFILE_EDITOR"},
 	Required: false,
 }

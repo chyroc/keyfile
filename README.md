@@ -21,6 +21,12 @@ keyfile encrypt --account `<account_name>` --file filepath > encrypt_filepath
 keyfile decrypt --account `<account_name>` --file encrypt_filepath
 ```
 
+### Decrypt File and Re-Encrypt to File
+
+```shell
+keyfile decrypt --account `<account_name>` --file encrypt_filepath --editor vim
+```
+
 ### Get Keychain Secret
 
 ```shell
